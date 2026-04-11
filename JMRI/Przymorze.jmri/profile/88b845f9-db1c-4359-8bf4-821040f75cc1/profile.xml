@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<auxiliary-configuration xmlns="http://www.netbeans.org/ns/auxiliary-configuration/1">
+    <connections xmlns="http://jmri.org/xml/schema/auxiliary-configuration/connections-2-9-6.xsd">
+        <connection xmlns="" address="192.168.4.95" class="jmri.jmrix.dccpp.network.configurexml.ConnectionConfigXml" disabled="no" manufacturer="DCC++" mdnsConfigure="false" port="2560" reconnectMaxAttempts="100" reconnectMaxInterval="120" systemPrefix="D" turnoutInterval="250" userName="DCC++">
+            <options/>
+        </connection>
+    </connections>
+</auxiliary-configuration>

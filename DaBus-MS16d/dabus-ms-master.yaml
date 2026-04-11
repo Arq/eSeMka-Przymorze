@@ -1,0 +1,1149 @@
+substitutions:
+  devicename: DABus-MS-Master
+  i2c_slave_address: 0x66
+  numPinsBytes: 8   # (64 pins = 8 bytes)
+  modbus_sensor01: 0x40   #dynamically changed on restart
+  ms_update_interval: 2s
+  ms_max_cmd_retries: 1 
+  ms_offline_skip_updates: 10
+  ms_command_throttle: 0ms
+    
+    
+  # version 2025-10-07  14:56
+  # Digital Accessory Bus Modbus Master Controler
+  #  * MCU: ESP32 module - wemos_d1_mini32
+  #  * Slave I2C bus_B (pull-up resistors soldered)
+  #  * RS485 interface with MAX13467E for Modbus protocol
+  #    * auxilary RS485 flow_control_pin: GPIO23 # pin12 for fake MAX13467E
+  #  * Modbus device server role with configurable address
+  #  * Modbus U_WORD register containg states of 8 binary sensors LSB and 8 optical sensors MSB
+  #  * Slave I2C bus using Custom Component with help of robertklep/esphome-custom-component 
+  #  * Master I2C Bus cannot only be with Custom Component using esp-idf not arduino compiler
+  #  * Master I2C Bus_A  
+  #     * Oled Display i2C Port
+  #  **Optional modules**
+  #     * TCA on I2C bus_A with 8 chanels to APDS9960 or APDS9900
+  # * 8 direct input pins with optoisolation (no pcf857X expander)
+  
+   
+  # https://docs.espressif.com/projects/esp-idf/en/latest/esp32/hw-reference/esp32/get-started-devkitc.html
+  # https://rntlab.com/question/what-pins-are-the-i2c-pins-on-the-esp32/
+  # https://www.luisllamas.es/en/which-pins-can-i-use-on-esp32/
+  # https://docs.platformio.org/en/latest/boards/espressif32/wemos_d1_mini32.html
+  # https://esphome.io/cookbook/lambda_magic.html
+  #
+  # ESPHome Custom component, i2c Slave
+  #  [Issues Configuring I2C as Slave with ESPHome and How I Solved Them - ESPHome - Home Assistant Community](https://community.home-assistant.io/t/issues-configuring-i2c-as-slave-with-esphome-and-how-i-solved-them/774238/5)
+  #  [robertklep/esphome-custom-component: Brings back support for custom ESPHome components](https://github.com/robertklep/esphome-custom-component)
+  #  [Custom i2c component and Esphome? - Configuration - Home Assistant Community](https://community.home-assistant.io/t/custom-i2c-component-and-esphome/338309)
+  # List of changes:
+  # * web server with included js file
+  
+esphome:
+  name: dabus-ms-master
+  comment: Digital Accessory Bus - Modbus Master Controler Rev 1.0
+  friendly_name: $devicename
+  includes:
+    - dabus_i2c_slave.h  # EspI2CSlave Custom component file to include (esp-idf)
+
+  libraries:
+#    - "i2c_slave"
+ 
+  on_boot: 
+    - priority: 610  #most sensors are set up
+      then:
+        - script.execute: reset_signals
+
+        
+esp32:
+  board: wemos_d1_mini32
+#  board: esp32dev
+
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_I2C_ENABLE_SLAVE_DRIVER_VERSION_2: y
+      CONFIG_I2C_ISR_IRAM_SAFE: n
+
+# Enable logging
+logger:
+#  level: INFO
+  level: DEBUG
+  logs:
+    #apds9960: INFO
+    sensor: INFO
+  baud_rate: 0  #disable logging via UART
+  
+# Enable Home Assistant API
+api:
+  encryption:
+    key: !secret api_encryption_key
+  reboot_timeout: 0s
+
+# Example configuration entry
+#mqtt:
+#  reboot_timeout: 0s
+#  id: mqtt_client
+#  broker: !secret h0_mqtt_broker
+#  username: !secret h0_mqtt_user
+#  password: !secret h0_mqtt_password
+
+ota:
+  platform: esphome
+  password: "0c3c72389fbf5e748313d67d83b96600"
+
+
+wifi:
+  ssid: !secret h0_wifi_ssid
+  password: !secret h0_wifi_password
+#  manual_ip:
+#    static_ip: 192.168.4.xx
+#    gateway: 192.168.4.1
+#    subnet: 255.255.255.0
+# https://github.com/esphome/issues/issues/5692
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: $devicename Fallback Hotspot
+    password: !secret ap_password
+
+web_server:
+    port: 80 
+    version: 3    
+    local: false
+    js_include: "www.js"
+    js_url: ""
+    auth:
+      username: admin
+      password: !secret wifi_password 
+    sorting_groups:
+      - id: sorting_group_modbus
+        name: "Modbus"
+        sorting_weight: 10 
+      - id: sorting_group_states
+        name: "Sensor states"
+        sorting_weight: 11 
+      - id: sorting_group_proximity
+        name: "Proximity sensors"
+        sorting_weight: 12    
+
+captive_portal:
+
+
+#external_components:
+#  - source: github://robertklep/esphome-custom-component
+#    components: [ custom, custom_component ]
+external_components:
+  - source:
+      type: git
+      url: https://github.com/robertklep/esphome-custom-component
+    components: [ custom, custom_component ]    
+    
+globals:
+  - id: data_buf
+    type: uint8_t[32]
+    initial_value: '{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}'    
+  - id: data_buf_latch
+    type: uint8_t[32]
+    initial_value: '{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}'      
+    
+number:
+  - id: modbus_addr
+    name: Master Address
+    mode: box
+    platform: template
+    entity_category: config
+    min_value: 1
+    max_value: 10
+    initial_value: 10
+    step: 1
+    restore_value: true
+    optimistic: true
+    web_server:
+      sorting_weight: 1  
+      sorting_group_id: sorting_group_modbus
+
+  - id: modbus_sensor_first_addres 
+    name: First Sensors Address
+    mode: box
+    platform: template
+    entity_category: config
+    min_value: 20
+    max_value: 231
+    initial_value: 0x20
+    step: 1
+    restore_value: true
+    optimistic: true
+    web_server:
+      sorting_weight: 2  
+      sorting_group_id: sorting_group_modbus
+
+
+i2c:
+  - id: bus_a
+    sda: GPIO21   #pin27
+    scl: GPIO22   #pin25
+    scan: true
+    frequency: 400kHz
+
+font:
+  - file: "fonts/Arial.ttf"
+    id: arial_20_font
+    size: 20
+  - file: "fonts/Roboto-Regular.ttf"
+    id: roboto_regular_20_font
+    size: 20    
+
+display:
+  - platform: ssd1306_i2c
+    model: "SSD1306 128x64"
+    i2c_id: bus_a
+#    reset_pin: D0
+    address: 0x3C
+    lambda: |-
+      it.print(0, 0, id(arial_20_font), "DaBus MS16D!");
+      it.line(0, 60, 128, 60); 
+
+one_wire:
+  - platform: gpio
+    pin: GPIO13     #pin18  
+    id: wire_a
+
+
+###-------------------------
+##RS485 port for modbus master (client) talking to slave devices
+## or
+##RS485 port for modbus slave (server) responding to master device
+uart:  
+   - id: uart_modbus
+     tx_pin: 27  #pin24
+     rx_pin: 25  #pin26
+     baud_rate:  115200
+     stop_bits: 1
+#   
+## defining modbus master (client)   
+modbus:
+   - uart_id: uart_modbus
+     id: modbus_master
+     flow_control_pin: GPIO23 # pin12
+
+
+#The Modbus master controller controls the slave devices on the bus.
+modbus_controller:
+   - id: dabus_ms16d_01   
+     address: ${modbus_sensor01} ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_online:
+       then:
+         #- logger.log: "Modbus Sensor 01 back Online!"   #debug
+         - lambda: |-
+             //ESP_LOGI("main","Modbus Sensor 01 back Online!");
+             id(dabus_ms16d_01).set_update_interval(2000);  // doesn't work
+             return;
+     on_offline:
+       then:
+         - lambda: |-
+             //ESP_LOGI("main","Modbus Sensor 01 goes Offline!");
+             id(dabus_ms16d_01).set_update_interval(60000); // doesn't work
+             id(register_0x01).publish_state(NAN);
+             id(data_buf)[2] = 0;
+             id(data_buf)[3] = 0;
+             id(data_buf_latch)[2] = 0;
+             id(data_buf_latch)[3] = 0;
+             return;
+             
+   
+   - id: dabus_ms16d_02   
+     address: ${modbus_sensor01 +1}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x02).publish_state(NAN);
+             id(data_buf)[4] = 0;
+             id(data_buf)[5] = 0;
+             id(data_buf_latch)[4] = 0;
+             id(data_buf_latch)[5] = 0;
+             return;
+   
+   - id: dabus_ms16d_03   
+     address: ${modbus_sensor01 +2}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x03).publish_state(NAN);
+             id(data_buf)[6] = 0;
+             id(data_buf)[7] = 0;
+             id(data_buf_latch)[6] = 0;
+             id(data_buf_latch)[7] = 0;
+             return;
+     
+   - id: dabus_ms16d_04   
+     address: ${modbus_sensor01 +3}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x04).publish_state(NAN);
+             id(data_buf)[8] = 0;
+             id(data_buf)[9] = 0;
+             id(data_buf_latch)[8] = 0;
+             id(data_buf_latch)[9] = 0;
+             return;
+   
+   - id: dabus_ms16d_05   
+     address: ${modbus_sensor01 +4}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x05).publish_state(NAN);
+             id(data_buf)[10] = 0;
+             id(data_buf)[11] = 0;
+             id(data_buf_latch)[10] = 0;
+             id(data_buf_latch)[11] = 0;
+             return;
+     
+   - id: dabus_ms16d_06   
+     address: ${modbus_sensor01 +5}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x06).publish_state(NAN);
+             id(data_buf)[12] = 0;
+             id(data_buf)[13] = 0;
+             id(data_buf_latch)[12] = 0;
+             id(data_buf_latch)[13] = 0;
+             return;
+   
+   - id: dabus_ms16d_07   
+     address: ${modbus_sensor01 +6}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: 2s
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x07).publish_state(NAN);
+             id(data_buf)[14] = 0;
+             id(data_buf)[15] = 0;
+             id(data_buf_latch)[14] = 0;
+             id(data_buf_latch)[15] = 0;
+             return;
+
+   - id: dabus_ms16d_08   
+     address: ${modbus_sensor01 +7}  ## address of the Modbus slave device on the bus
+     modbus_id: modbus_master     
+     update_interval: $ms_update_interval
+     command_throttle: $ms_command_throttle
+     setup_priority: -10
+     offline_skip_updates: $ms_offline_skip_updates
+     max_cmd_retries: $ms_max_cmd_retries
+     on_offline:
+       then:
+         - lambda: |-
+             id(register_0x08).publish_state(NAN);
+             id(data_buf)[16] = 0;
+             id(data_buf)[17] = 0;
+             id(data_buf_latch)[16] = 0;
+             id(data_buf_latch)[17] = 0;
+             return;
+   
+#   - id: dabus_ms16d_09   
+#     address: ${modbus_sensor01 +8}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x09).publish_state(NAN);
+#            id(data_buf)[18] = 0;
+#            id(data_buf)[19] = 0;
+#            id(data_buf_latch)[18] = 0;
+#            id(data_buf_latch)[19] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0A   
+#     address: ${modbus_sensor01 +9}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0a).publish_state(NAN);
+#            id(data_buf)[20] = 0;
+#            id(data_buf)[21] = 0;
+#            id(data_buf_latch)[20] = 0;
+#            id(data_buf_latch)[21] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0B   
+#     address: ${modbus_sensor01 +10}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0b).publish_state(NAN);
+#            id(data_buf)[22] = 0;
+#            id(data_buf)[23] = 0;
+#            id(data_buf_latch)[22] = 0;
+#            id(data_buf_latch)[23] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0C   
+#     address: ${modbus_sensor01 +11}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0c).publish_state(NAN);
+#            id(data_buf)[24] = 0;
+#            id(data_buf)[25] = 0;
+#            id(data_buf_latch)[24] = 0;
+#            id(data_buf_latch)[25] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0D   
+#     address: ${modbus_sensor01 +12}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0d).publish_state(NAN);
+#            id(data_buf)[26] = 0;
+#            id(data_buf)[27] = 0;
+#            id(data_buf_latch)[26] = 0;
+#            id(data_buf_latch)[27] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0E   
+#     address: ${modbus_sensor01 +13}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0e).publish_state(NAN);
+#            id(data_buf)[28] = 0;
+#            id(data_buf)[29] = 0;
+#            id(data_buf_latch)[28] = 0;
+#            id(data_buf_latch)[29] = 0;
+#            return;
+#
+#   - id: dabus_ms16d_0F   
+#     address: ${modbus_sensor01 +14}  ## address of the Modbus slave device on the bus
+#     modbus_id: modbus_master     
+#     update_interval: $ms_update_interval
+#     command_throttle: 100ms
+#     setup_priority: -10
+#     on_offline:
+#      then:
+#        - lambda: |-
+#            id(register_0x0f).publish_state(NAN);
+#            id(data_buf)[30] = 0;
+#            id(data_buf)[31] = 0;
+#            id(data_buf_latch)[30] = 0;
+#            id(data_buf_latch)[31] = 0;
+#            return;
+
+
+###-------------------------
+
+light:  
+  - platform: monochromatic
+    name: Blue LED
+    output: output_onboard_led  
+    id: blue_led
+    
+
+script:
+## Reset state of modbus Slave
+  - id: reset_signals
+    then: 
+      lambda: |-
+        id(i2c_slave_address_text_sensor).publish_state("$i2c_slave_address");
+        id(dabus_ms16d_01).set_address(id(modbus_sensor_first_addres).state+0);
+        id(dabus_ms16d_02).set_address(id(modbus_sensor_first_addres).state+1);
+        id(dabus_ms16d_03).set_address(id(modbus_sensor_first_addres).state+2);
+        id(dabus_ms16d_04).set_address(id(modbus_sensor_first_addres).state+3);
+        id(dabus_ms16d_05).set_address(id(modbus_sensor_first_addres).state+4);
+        id(dabus_ms16d_06).set_address(id(modbus_sensor_first_addres).state+5);
+        id(dabus_ms16d_07).set_address(id(modbus_sensor_first_addres).state+6);
+        id(dabus_ms16d_08).set_address(id(modbus_sensor_first_addres).state+7);
+        //id(dabus_ms16d_09).set_address(id(modbus_sensor_first_addres).state+8);
+        return;
+#        id(modbus_slave_controller).set_address(id(modbus_addr).state);
+
+
+custom_component:
+  - lambda: |-
+      auto i2c_slave = new DABusI2CSlave(id($i2c_slave_address),16,17,id(data_buf_latch),id($numPinsBytes),id(i2c_slave_request_notify),id(i2c_sensor_message));
+      return {i2c_slave};
+    components:
+    - id: i2c_slave_id 
+
+text_sensor:
+
+  - platform: template
+    name: "I2C Sensor: Received Message"
+    id: i2c_sensor_message
+    internal: true
+    on_value:
+      then:
+        - logger.log: "i2c slave received message"
+  
+  - platform: template
+    name: "I2C Slave Address"
+    id: i2c_slave_address_text_sensor
+    entity_category: diagnostic
+
+  # Expose ESPHome version as sensor.
+  - platform: version
+    name: Version
+
+  # Expose WiFi information as sensors.
+  - platform: wifi_info
+    ip_address:
+      name: IP
+      update_interval: 60s
+    bssid:
+      name: BSSID
+    
+
+  # human readable update text sensor from sensor:uptime
+  - platform: template
+    name: Uptime Human Readable
+    id: uptime_human
+    icon: mdi:clock-start   
+    entity_category: diagnostic
+  
+output:
+#  GPIO0 GPIO2 GPIO5 GPIO12 is a strapping PIN and should only be used for I/O with care
+#  GPIO (34-39) does not support output pin mode - they are input only pins  
+#  GPIO (34-39) does not support pullups
+#  Pin (9-10) might already be used by the flash interface in QUAD IO flash mode TXD_1, RXD_1
+
+  - platform: ledc
+    pin: GPIO2  # on board led
+    id: output_onboard_led
+    inverted: false 
+    
+#  - platform: gpio
+#    pin: GPIO0     #pin34 NC   #strapping PIN
+#    id: nc_00
+
+#  - platform: gpio
+#    pin: GPIO5     #pin14  NC  #strapping PIN
+#    id: nc_05
+
+#  - platform: gpio
+#    pin: GPIO9     #pin17 NC #connected to the integrated SPI 
+#    id: nc_09
+
+#  - platform: gpio
+#    pin: GPIO10    #pin20 NC # connected to the integrated SPI 
+#    id: nc_10
+ 
+#  - platform: gpio
+#    pin: GPIO12    #pin30  NC  #strapping PIN  
+#    id: nc_12  
+
+#  - platform: gpio
+#    pin: GPIO4    #pin32   
+#    id: io_04 
+#    inverted: true 
+#
+#  - platform: gpio
+#    pin: GPIO32   #pin28  
+#    id: io_32 
+#    inverted: true
+#
+#  - platform: gpio
+#    pin: GPIO23   #pin12  // flow_control_ pin in RS485
+#    id: io_23
+#    inverted: true
+#    
+#  - platform: gpio
+#    pin: GPIO14   #pin13   
+#    id: io_14 
+#    inverted: true
+#  
+#  - platform: gpio
+#    pin: GPIO13   #pin18  - Used by ONE_WIRE
+#    id: io_13
+#    inverted: true  
+  
+binary_sensor:
+
+  - platform: gpio
+    name: In 0
+    id: in0
+    pin: 
+      number: GPIO36   #pin4 
+      inverted: true
+      mode: 
+        input: true
+        #pullup: true
+    web_server:
+      sorting_weight: 1  
+      sorting_group_id: sorting_group_states
+    filters:  
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 1;
+          }
+          return x;
+  - platform: gpio
+    name: In 1
+    id: in1 
+    pin: 
+      number: GPIO39   #pin5 #input only
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 2  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 2;
+          }
+          return x;     
+  - platform: gpio
+    name: In 2
+    id: in2   
+    pin: 
+      number: GPIO26   #pin6
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 4;
+          }
+          return x;        
+  - platform: gpio
+    name: In 3
+    id: in3
+    pin: 
+      number: GPIO35   #pin7  #input only
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 4  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 8;
+          }
+          return x;       
+  
+  - platform: gpio
+    name: In 4
+    id: in4
+    pin: 
+      number: GPIO18   #pin8
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 5  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 16;
+          }
+          return x;       
+  - platform: gpio
+    name: In 5
+    id: in5
+    pin: 
+      number: GPIO33   #pin9   
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 6  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 32;
+          }
+          return x;       
+  - platform: gpio
+    name: In 6
+    id: in6
+    pin: 
+      number: GPIO19   #pin10
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 7  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 64;
+          }
+          return x;       
+  - platform: gpio
+    name: In 7
+    id: in7
+    pin: 
+      number: GPIO34   #pin11  NC input only
+      inverted: true
+      mode: 
+        input: true
+    web_server:
+      sorting_weight: 8  
+      sorting_group_id: sorting_group_states
+    filters:   
+      - lambda: |-  
+          if (x) {
+            id(data_buf_latch)[1] |= 128;
+          }
+          return x;       
+
+switch:
+  - platform: restart
+    name: "Restart"
+    entity_category: diagnostic
+    
+### Configuration switches
+
+   
+sensor:
+  - platform: wifi_signal
+    name: WiFi signal
+    update_interval: 600s
+
+  # human readable uptime sensor output to the text sensor above
+  - platform: uptime
+    name: Uptime in Days
+    id: uptime_sensor_days
+    internal: true
+    update_interval: 60s
+    on_raw_value:
+      then:
+        - text_sensor.template.publish:
+            id: uptime_human
+            state: !lambda |-
+              int seconds = round(id(uptime_sensor_days).raw_state);
+              int days = seconds / (24 * 3600);
+              seconds = seconds % (24 * 3600);
+              int hours = seconds / 3600;
+              seconds = seconds % 3600;
+              int minutes = seconds /  60;
+              seconds = seconds % 60;
+              // Conversion to string for board type: esp-idf and arduino
+              char buffer[100]; // Allocate sufficient buffer size
+              if ( days > 3650 ) {
+                  return { "Starting up" };
+              } else {
+                if ( days ) {
+                   sprintf(buffer, "%d d %d h %d m %d s",days,hours,minutes,seconds);
+                } else if ( hours ) {
+                   sprintf(buffer, "%d h %d m %d s",hours,minutes,seconds);
+                } else if ( minutes ) {
+                   sprintf(buffer, "%d m %d s",minutes,seconds);
+                } else {
+                   sprintf(buffer, "%d", seconds); 
+                }   
+                std::string str(buffer); // Convert char array to string
+                return str;
+              }
+              
+  - platform: dallas_temp
+#   address: 0x...
+    update_interval: 40s
+    name: Temperature
+    one_wire_id: wire_a
+    id: sensor_t_ic
+    filters:
+     - filter_out: 85.0
+
+  - platform: binary_sensor_map
+    id: sensors_map
+    name: 'Register 0x00 (local)'
+    type: sum
+    web_server:
+      sorting_weight: 2  
+      sorting_group_id: sorting_group_modbus
+    channels:
+      - binary_sensor: in0
+        value: 1
+      - binary_sensor: in1
+        value: 2
+      - binary_sensor: in2
+        value: 4
+      - binary_sensor: in3
+        value: 8
+      - binary_sensor: in4
+        value: 16
+      - binary_sensor: in5
+        value: 32
+      - binary_sensor: in6
+        value: 64
+      - binary_sensor: in7
+        value: 128
+
+  - platform: template
+    #name: "I2C slave data request"  
+    internal: true
+    id: i2c_slave_request_notify
+    on_value:
+      then:
+        #- logger.log: "i2c request notify"  
+        - lambda: |-
+            //ESP_LOGI("i2c_slave_request_notify","i2c slave data sent");
+            id(data_buf)[0] = 0;
+            id(data_buf)[1] = id(sensors_map).state;
+            // capture a copy of current data 
+            for (uint8_t i=0;i<32;i++) {
+              id(data_buf_latch)[i] = id(data_buf)[i];
+            }
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_01 
+    name: "Register 0x01 (modbus)"
+    id: register_0x01
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x01: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[2] = data[0]; //register 1
+       id(data_buf)[3] = data[1];
+       id(data_buf_latch)[2] |=  data[0];
+       id(data_buf_latch)[3] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_02 
+    name: "Register 0x02 (modbus)"
+    id: register_0x02
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x02: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[4] = data[0]; 
+       id(data_buf)[5] = data[1];
+       id(data_buf_latch)[4] |=  data[0];
+       id(data_buf_latch)[5] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_03 
+    name: "Register 0x03 (modbus)"
+    id: register_0x03
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x03: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[6] = data[0]; 
+       id(data_buf)[7] = data[1];
+       id(data_buf_latch)[6] |=  data[0];
+       id(data_buf_latch)[7] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_04 
+    name: "Register 0x04 (modbus)"
+    id: register_0x04
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x04: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[8] = data[0]; 
+       id(data_buf)[9] = data[1];
+       id(data_buf_latch)[8] |=  data[0];
+       id(data_buf_latch)[9] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_05 
+    name: "Register 0x05 (modbus)"
+    id: register_0x05
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x05: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[10] = data[0];
+       id(data_buf)[11] = data[1];
+       id(data_buf_latch)[10] |=  data[0];
+       id(data_buf_latch)[11] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_06 
+    name: "Register 0x06 (modbus)"
+    id: register_0x06
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x06: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[12] = data[0];
+       id(data_buf)[13] = data[1];
+       id(data_buf_latch)[12] |=  data[0];
+       id(data_buf_latch)[13] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_07 
+    name: "Register 0x07 (modbus)"
+    id: register_0x07
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x07: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[14] = data[0];
+       id(data_buf)[15] = data[1];
+       id(data_buf_latch)[14] |=  data[0];
+       id(data_buf_latch)[15] |=  data[1];
+       return x;
+
+  - platform: modbus_controller
+    modbus_controller_id: dabus_ms16d_08 
+    name: "Register 0x08 (modbus)"
+    id: register_0x08
+    register_type: read
+    unit_of_measurement: ""
+    address: 0x0000      ##  address of the register inside the Modbus slave device
+    value_type: U_WORD
+    web_server:
+      sorting_weight: 3  
+      sorting_group_id: sorting_group_modbus  
+    lambda: |-  
+       ESP_LOGI("modbus","Register 0x08: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+       id(data_buf)[16] = data[0];
+       id(data_buf)[17] = data[1];
+       id(data_buf_latch)[16] |=  data[0];
+       id(data_buf_latch)[17] |=  data[1];
+       return x;
+
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_09 
+#    name: "Register 0x09 (modbus)"
+#     id: register_0x09
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x09: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[18] = data[0];
+#       id(data_buf)[19] = data[1];
+#       id(data_buf_latch)[18] |=  data[0];
+#       id(data_buf_latch)[19] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0A 
+#    name: "Register 0x0A (modbus)"
+#     id: register_0x0A
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0A: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[20] = data[0];
+#       id(data_buf)[21] = data[1];
+#       id(data_buf_latch)[20] |=  data[0];
+#       id(data_buf_latch)[21] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0B 
+#    name: "Register 0x0B (modbus)"
+#    id: register_0x0B
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0B: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[22] = data[0];
+#       id(data_buf)[23] = data[1];
+#       id(data_buf_latch)[22] |=  data[0];
+#       id(data_buf_latch)[23] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0C 
+#    name: "Register 0x0C (modbus)"
+#     id: register_0x0C
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0C: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[24] = data[0];
+#       id(data_buf)[25] = data[1];
+#       id(data_buf_latch)[24] |=  data[0];
+#       id(data_buf_latch)[25] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0D 
+#    name: "Register 0x0D (modbus)"
+#    id: register_0x0D
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0D: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[26] = data[0];
+#       id(data_buf)[27] = data[1];
+#       id(data_buf_latch)[26] |=  data[0];
+#       id(data_buf_latch)[27] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0E 
+#    name: "Register 0x0E (modbus)"
+#    id: register_0x0E
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0E: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[28] = data[0];
+#       id(data_buf)[29] = data[1];
+#       id(data_buf_latch)[28] |=  data[0];
+#       id(data_buf_latch)[29] |=  data[1];
+#       return x;
+#
+#  - platform: modbus_controller
+#    modbus_controller_id: dabus_ms16d_0F 
+#    name: "Register 0x0F (modbus)"
+#    id: register_0x0F
+#    register_type: read
+#    unit_of_measurement: ""
+#    address: 0x0000      ##  address of the register inside the Modbus slave device
+#    value_type: U_WORD
+#    web_server:
+#      sorting_weight: 3  
+#      sorting_group_id: sorting_group_modbus  
+#    lambda: |-  
+#       ESP_LOGI("modbus","Register 0x0F: %02x%02x",data[0],data[1]);  //U_WORD: MSB , LSB 
+#       id(data_buf)[30] = data[0];
+#       id(data_buf)[31] = data[1];
+#       id(data_buf_latch)[30] |=  data[0];
+#       id(data_buf_latch)[31] |=  data[1];
+#       return x;

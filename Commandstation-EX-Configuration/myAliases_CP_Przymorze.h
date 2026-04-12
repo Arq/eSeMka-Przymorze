@@ -38,7 +38,10 @@ ALIAS(CP_SH_B_BTN,CP_SH_B+IC_BTN)
 ALIAS(CP_SH_B_L,CP_SH_B+IC_RL)   // Left (Occupancy and Route)
 ALIAS(CP_SH_B_R,CP_SH_B+IC_RR)   // Right (Occupancy and Route)
 ALIAS(CP_SH_B_SB,CP_SH_B+IC_SR3)  // Signal Basic   (for Left or Right)
+ALIAS(CP_SH_B_SA1,CP_SH_B+IC_SR2)  // Signal Basic AMBER 1
+ALIAS(CP_SH_B_SA2,CP_SH_B+IC_SR4)  // Signal Basic AMBER 2
 ALIAS(CP_SH_B_SE,CP_SH_B+IC_SR5)  // Signal Extended (for Left or Right)
+
 
 ALIAS(CP_SH_A,4020)   // ICBlock Signal
 ALIAS(CP_SH_A_BTN,CP_SH_A+IC_BTN)
@@ -312,3 +315,26 @@ ALIAS(CP_SH_L_L,CP_SH_L+IC_RL)   // Left (Occupancy and Route)
 ALIAS(CP_SH_L_R,CP_SH_L+IC_RR)   // Right (Occupancy and Route)
 ALIAS(CP_SH_L_SB,CP_SH_L+IC_SL3)  // Signal Basic  (for Left or Right)
 ALIAS(CP_SH_L_SE,CP_SH_L+IC_SL5)  // Signal Extended (for Left or Right)
+
+// Virtual pins Bitmap   experymential
+ALIAS(CP_ROUTE_FLAGS,3000)  // 16bit temporary variable
+
+// Wirtal pin
+ALIAS(CP_ROUTE_FLAG_1,10)
+
+
+// Control Panel Procedures  
+//ALIAS(PROC_RESET_CP)
+ALIAS(CP_RESET)
+ALIAS(CP_REFRESH)   // Dasboard routes an occupancy refersh
+// Reset Light Semaphores on Turnout Change
+ALIAS(CP_RESET_A)
+ALIAS(CP_RESET_B)
+ALIAS(CP_RESET_M)
+ALIAS(CP_RESET_L)
+
+ALIAS(CP_RESET_G4)
+ALIAS(CP_RESET_D4)
+ALIAS(CP_RESET_SH12)
+ALIAS(CP_RESET_SH4)
+ALIAS(CP_RESET_SH14)

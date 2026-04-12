@@ -1,15 +1,39 @@
 
-
 ONBUTTON(CP_SH_B_BTN)   
   DELAY(250)     // delays doesnt work
+  
+
   IFRED(CP_SH_B_SB)
+
     // check dependency
-    //IFTHROWN()
-      //AMBER(CP_SH_B_SB)
-    //ELSE
-    GREEN(CP_SH_B_SB)
-	  GREEN(CP_SH_B_SE)
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_2_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+    IFTHROWN(CP_TN_6_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+    //IFAMBER(CP_SH_G1_SB)
+    //  LATCH(CP_ROUTE_FLAG_1)
     //ENDIF
+
+    IF(CP_ROUTE_FLAG_1)
+      AMBER(CP_SH_B_SB)
+      AMBER(CP_SH_B_SE)
+      //BLINK(CP_SH_B_SA1,500,500)
+      //BLINK(CP_SH_B_SA2,500,500)
+    ELSE
+      IFAMBER(CP_SH_G1_SE)
+        GREEN(CP_SH_B_SB)
+	      AMBER(CP_SH_B_SE)
+      ELSE
+        IFRED(CP_SH_G1_SB)
+          AMBER(CP_SH_B_SB)
+        ELSE  // GREEN
+          GREEN(CP_SH_B_SB)
+        ENDIF  
+      ENDIF  
+    ENDIF
   ELSE
     RED(CP_SH_B_SB)
     GREEN(CP_SH_B_SE) // off
@@ -58,7 +82,36 @@ ONBUTTON(CP_SH_1_BTN)
   DELAY(250)  
 DONE
 
+ONBUTTON(CP_TN_2_BTN)
+  IFCLOSED(CP_TN_2_TRN) 
+     THROW(TRN_01)
+  ELSE
+     CLOSE(TRN_01)
+  ENDIF
+  CALL(CP_RESET_B)
+  CALL(CP_RESET_A)
+  IFCLOSED(CP_TN_2_TRN) 
+     THROW(CP_TN_2_TRN)
+  ELSE
+     CLOSE(CP_TN_2_TRN)
+  ENDIF
+DONE
+
+ONCLOSE(CP_TN_2_TRN)
+  CALL(CP_REFRESH)  
+DONE
+
+ONTHROW(CP_TN_2_TRN)
+  CALL(CP_REFRESH)
+DONE
+
 ONBUTTON(CP_TN_6_BTN)
+  IFCLOSED(CP_TN_6_TRN) 
+     THROW(TRN_06)
+  ELSE
+     CLOSE(TRN_06)
+  ENDIF 
+  CALL(CP_RESET_B)
   IFCLOSED(CP_TN_6_TRN) 
      THROW(CP_TN_6_TRN)
   ELSE
@@ -76,6 +129,13 @@ DONE
 
 ONBUTTON(CP_TN_5_BTN)
   IFCLOSED(CP_TN_5_TRN) 
+     THROW(TRN_05)
+  ELSE
+     CLOSE(TRN_05)
+  ENDIF
+  CALL(CP_RESET_A)
+  CALL(CP_RESET_SH4)
+  IFCLOSED(CP_TN_5_TRN) 
      THROW(CP_TN_5_TRN)
   ELSE
      CLOSE(CP_TN_5_TRN)
@@ -91,6 +151,12 @@ ONTHROW(CP_TN_5_TRN)
 DONE
 
 ONBUTTON(CP_TN_8_BTN)
+  IFCLOSED(CP_TN_8_TRN) 
+     THROW(TRN_08)
+  ELSE
+     CLOSE(TRN_08)
+  ENDIF
+  CALL(CP_RESET_A)
   IFCLOSED(CP_TN_8_TRN) 
      THROW(CP_TN_8_TRN)
   ELSE
@@ -109,6 +175,12 @@ DONE
 
 ONBUTTON(CP_TN_7_BTN)
   IFCLOSED(CP_TN_7_TRN) 
+     THROW(TRN_07)
+  ELSE
+     CLOSE(TRN_07)
+  ENDIF
+  CALL(CP_RESET_SH4)
+  IFCLOSED(CP_TN_7_TRN) 
      THROW(CP_TN_7_TRN)
   ELSE
      CLOSE(CP_TN_7_TRN)
@@ -125,8 +197,20 @@ DONE
 
 ONBUTTON(CP_SH_D1_BTN)   
   IFRED(CP_SH_D1_SB)
-    GREEN(CP_SH_D1_SB)
-	  GREEN(CP_SH_D1_SE)  
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_2_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+
+    IFCLOSED(CP_TN_6_TRN)
+      IF(CP_ROUTE_FLAG_1)
+        GREEN(CP_SH_D1_SB)
+        AMBER(CP_SH_D1_SE)
+      ELSE  
+        GREEN(CP_SH_D1_SB)
+	      GREEN(CP_SH_D1_SE)  
+      ENDIF  
+    ENDIF
   ELSE
     RED(CP_SH_D1_SB)  
     GREEN(CP_SH_D1_SE) // off
@@ -136,8 +220,21 @@ DONE
 
 ONBUTTON(CP_SH_D2_BTN)   
   IFRED(CP_SH_D2_SB)
-    GREEN(CP_SH_D2_SB)
-	  GREEN(CP_SH_D2_SE)  
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_2_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+    IFCLOSED(CP_TN_5_TRN)
+      IFCLOSED(CP_TN_8_TRN)
+        IF(CP_ROUTE_FLAG_1)
+          GREEN(CP_SH_D2_SB)
+          AMBER(CP_SH_D2_SE)
+        ELSE  
+          GREEN(CP_SH_D2_SB)
+          GREEN(CP_SH_D2_SE)  
+        ENDIF  
+      ENDIF
+    ENDIF
   ELSE
     RED(CP_SH_D2_SB)  
     GREEN(CP_SH_D2_SE) // off
@@ -147,8 +244,10 @@ DONE
 
 ONBUTTON(CP_SH_D3_BTN)   
   IFRED(CP_SH_D3_SB)
-    GREEN(CP_SH_D3_SB)
-	  GREEN(CP_SH_D3_SE)  
+    IFTHROWN(CP_TN_6_TRN)
+      GREEN(CP_SH_D3_SB)
+	    AMBER(CP_SH_D3_SE)  
+    ENDIF  
   ELSE
     RED(CP_SH_D3_SB)  
     GREEN(CP_SH_D3_SE) // off
@@ -158,8 +257,23 @@ DONE
 
 ONBUTTON(CP_SH_D4_BTN)   
   IFRED(CP_SH_D4_SB)
-    GREEN(CP_SH_D4_SB)
-	  GREEN(CP_SH_D4_SE)  
+    
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_2_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+
+    IFCLOSED(CP_TN_5_TRN)
+      IFTHROWN(CP_TN_8_TRN)
+        IF(CP_ROUTE_FLAG_1)
+          GREEN(CP_SH_D4_SB)
+          AMBER(CP_SH_D4_SE)
+        ELSE  
+          GREEN(CP_SH_D4_SB)
+          AMBER(CP_SH_D4_SE)  
+        ENDIF  
+      ENDIF
+    ENDIF
   ELSE
     RED(CP_SH_D4_SB)  
     GREEN(CP_SH_D4_SE) // off
@@ -167,28 +281,18 @@ ONBUTTON(CP_SH_D4_BTN)
   DELAY(250)  // delay before issuing command  to next servo
 DONE
 
-ONBUTTON(CP_TN_2_BTN)
-  IFCLOSED(CP_TN_2_TRN) 
-     THROW(CP_TN_2_TRN)
-  ELSE
-     CLOSE(CP_TN_2_TRN)
-  ENDIF   
-DONE
 
-ONCLOSE(CP_TN_2_TRN)
-  CALL(CP_REFRESH)  
-DONE
 
-ONTHROW(CP_TN_2_TRN)
-  CALL(CP_REFRESH)
-DONE
-
-ONBUTTON(CP_SH_4_BTN)    // delays doesnt work
+ONBUTTON(CP_SH_4_BTN)    
   IFGREEN(CP_SH_4_SS)  //is off
     RED(CP_SH_4_SS)
   ELSE
     IFRED(CP_SH_4_SS)
-      AMBER(CP_SH_4_SS)
+      IFTHROWN(CP_TN_5_TRN)
+        IFCLOSED(CP_TN_7_TRN)
+          AMBER(CP_SH_4_SS)
+        ENDIF  
+      ENDIF
     ELSE
       //GREEN(CP_SH_4_SS)  //off  should never happend
 	    RED(CP_SH_4_SS)
@@ -202,7 +306,11 @@ ONBUTTON(CP_SH_3_BTN)    // delays doesnt work
     RED(CP_SH_3_SS)
   ELSE
     IFRED(CP_SH_3_SS)
-      AMBER(CP_SH_3_SS)
+      IFTHROWN(CP_TN_5_TRN)
+        IFTHROWN(CP_TN_7_TRN)
+          AMBER(CP_SH_3_SS)
+        ENDIF  
+      ENDIF
     ELSE
       //GREEN(CP_SH_3_SS)  //off  should never happend
 	    RED(CP_SH_3_SS)
@@ -217,7 +325,11 @@ ONBUTTON(CP_SH_12_BTN)    // delays doesnt work
     RED(CP_SH_12_SS)
   ELSE
     IFRED(CP_SH_12_SS)
-      AMBER(CP_SH_12_SS)
+      IFTHROWN(CP_TN_22_TRN)
+        IFCLOSED(CP_TN_21_TRN)
+          AMBER(CP_SH_12_SS)
+        ENDIF
+      ENDIF
     ELSE
       //GREEN(CP_SH_2_SS)  //off  should never happend
 	    RED(CP_SH_12_SS)
@@ -232,7 +344,11 @@ ONBUTTON(CP_SH_11_BTN)
     RED(CP_SH_11_SS)
   ELSE
     IFRED(CP_SH_11_SS)
-      AMBER(CP_SH_11_SS)
+      IFTHROWN(CP_TN_22_TRN)
+        IFTHROWN(CP_TN_21_TRN)
+          AMBER(CP_SH_11_SS)
+        ENDIF
+      ENDIF    
     ELSE  
 	    RED(CP_SH_11_SS)
     ENDIF  
@@ -240,10 +356,38 @@ ONBUTTON(CP_SH_11_BTN)
   DELAY(250)  
 DONE
 
+ONBUTTON(CP_SH_G3_BTN)   
+  IFRED(CP_SH_G3_SB)
+    IFTHROWN(CP_TN_25_TRN)
+      GREEN(CP_SH_G3_SB)
+	    AMBER(CP_SH_G3_SE)  
+    ENDIF
+  ELSE
+    RED(CP_SH_G3_SB)  
+    GREEN(CP_SH_G3_SE) // off
+  ENDIF
+  DELAY(250)  // delay before issuing command  to next servo
+DONE
+
 ONBUTTON(CP_SH_G1_BTN)   
   IFRED(CP_SH_G1_SB)
-    GREEN(CP_SH_G1_SB)
-	  GREEN(CP_SH_G1_SE)  
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_27_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+    IFTHROWN(CP_TN_30_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+
+    IFCLOSED(CP_TN_25_TRN)
+      IF(CP_ROUTE_FLAG_1)
+        GREEN(CP_SH_G1_SB)
+        AMBER(CP_SH_G1_SE)
+      ELSE  
+        GREEN(CP_SH_G1_SB)
+	      GREEN(CP_SH_G1_SE)  
+      ENDIF  
+    ENDIF  
   ELSE
     RED(CP_SH_G1_SB)  
     GREEN(CP_SH_G1_SE) // off
@@ -253,8 +397,20 @@ DONE
 
 ONBUTTON(CP_SH_G2_BTN)   
   IFRED(CP_SH_G2_SB)
-    GREEN(CP_SH_G2_SB)
-	  GREEN(CP_SH_G2_SE)  
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_27_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+
+    IFCLOSED(CP_TN_24_TRN)
+      IF(CP_ROUTE_FLAG_1)
+        GREEN(CP_SH_G2_SB)
+        AMBER(CP_SH_G2_SE)
+      ELSE  
+        GREEN(CP_SH_G2_SB)
+	      GREEN(CP_SH_G2_SE)  
+      ENDIF  
+    ENDIF
   ELSE
     RED(CP_SH_G2_SB)  
     GREEN(CP_SH_G2_SE) // off
@@ -262,21 +418,23 @@ ONBUTTON(CP_SH_G2_BTN)
   DELAY(250)  // delay before issuing command  to next servo
 DONE
 
-ONBUTTON(CP_SH_G3_BTN)   
-  IFRED(CP_SH_G3_SB)
-    GREEN(CP_SH_G3_SB)
-	  GREEN(CP_SH_G3_SE)  
-  ELSE
-    RED(CP_SH_G3_SB)  
-    GREEN(CP_SH_G3_SE) // off
-  ENDIF
-  DELAY(250)  // delay before issuing command  to next servo
-DONE
+
 
 ONBUTTON(CP_SH_G4_BTN)   
   IFRED(CP_SH_G4_SB)
-    GREEN(CP_SH_G4_SB)
-	  GREEN(CP_SH_G4_SE)  
+    UNLATCH(CP_ROUTE_FLAG_1)
+    IFTHROWN(CP_TN_24_TRN)
+      LATCH(CP_ROUTE_FLAG_1)
+    ENDIF
+    IFCLOSED(CP_TN_22_TRN)
+      IF(CP_ROUTE_FLAG_1)
+        GREEN(CP_SH_G4_SB)
+	      AMBER(CP_SH_G4_SE)  
+      ELSE
+        AMBER(CP_SH_G4_SB)
+	      AMBER(CP_SH_G4_SE)  
+      ENDIF
+    ENDIF  
   ELSE
     RED(CP_SH_G4_SB)  
     GREEN(CP_SH_G4_SE) // off
@@ -286,10 +444,16 @@ DONE
 
 ONBUTTON(CP_TN_21_BTN)
   IFCLOSED(CP_TN_21_TRN) 
+     THROW(TRN_21)
+  ELSE
+     CLOSE(TRN_21)
+  ENDIF
+  CALL(CP_RESET_SH12)
+  IFCLOSED(CP_TN_21_TRN) 
      THROW(CP_TN_21_TRN)
   ELSE
      CLOSE(CP_TN_21_TRN)
-  ENDIF   
+  ENDIF
 DONE
 
 ONCLOSE(CP_TN_21_TRN)
@@ -301,6 +465,13 @@ ONTHROW(CP_TN_21_TRN)
 DONE
 
 ONBUTTON(CP_TN_22_BTN)
+  IFCLOSED(CP_TN_22_TRN) 
+     THROW(TRN_22b)
+  ELSE
+     CLOSE(TRN_22b)
+  ENDIF
+  CALL(CP_RESET_SH12)
+  CALL(CP_RESET_G4)
   IFCLOSED(CP_TN_22_TRN) 
      THROW(CP_TN_22_TRN)
   ELSE
@@ -318,10 +489,16 @@ DONE
 
 ONBUTTON(CP_TN_23_BTN)
   IFCLOSED(CP_TN_23_TRN) 
+     THROW(TRN_23)
+  ELSE
+     CLOSE(TRN_23)
+  ENDIF
+  CALL(CP_RESET_SH14)
+  IFCLOSED(CP_TN_23_TRN) 
      THROW(CP_TN_23_TRN)
   ELSE
      CLOSE(CP_TN_23_TRN)
-  ENDIF   
+  ENDIF 
 DONE
 
 ONCLOSE(CP_TN_23_TRN)
@@ -334,6 +511,15 @@ DONE
 
 
 ONBUTTON(CP_TN_24_BTN)
+  IFCLOSED(CP_TN_24_TRN) 
+     THROW(TRN_24)   //Notice: from closed position first command is sent to TRN_24
+     THROW(TRN_22a)
+  ELSE
+     CLOSE(TRN_22a)  //Notice: changed order of commands to allow program dcc address of TRN_22
+     CLOSE(TRN_24)
+  ENDIF
+  CALL(CP_RESET_L)
+  CALL(CP_RESET_SH14)
   IFCLOSED(CP_TN_24_TRN) 
      THROW(CP_TN_24_TRN)
   ELSE
@@ -351,6 +537,12 @@ DONE
 
 ONBUTTON(CP_TN_25_BTN)
   IFCLOSED(CP_TN_25_TRN) 
+     THROW(TRN_25)
+  ELSE
+     CLOSE(TRN_25)
+  ENDIF
+  CALL(CP_RESET_M)
+  IFCLOSED(CP_TN_25_TRN) 
      THROW(CP_TN_25_TRN)
   ELSE
      CLOSE(CP_TN_25_TRN)
@@ -366,6 +558,13 @@ ONTHROW(CP_TN_25_TRN)
 DONE
 
 ONBUTTON(CP_TN_27_BTN)
+IFCLOSED(CP_TN_27_TRN) 
+     THROW(TRN_26)
+  ELSE
+     CLOSE(TRN_26)
+  ENDIF
+  CALL(CP_RESET_M)
+  CALL(CP_RESET_L)
   IFCLOSED(CP_TN_27_TRN) 
      THROW(CP_TN_27_TRN)
   ELSE
@@ -385,10 +584,16 @@ DONE
 
 ONBUTTON(CP_TN_30_BTN)
   IFCLOSED(CP_TN_30_TRN) 
+     THROW(TRN_30)
+  ELSE
+     CLOSE(TRN_30)
+  ENDIF
+  CALL(CP_RESET_M)
+  IFCLOSED(CP_TN_30_TRN) 
      THROW(CP_TN_30_TRN)
   ELSE
      CLOSE(CP_TN_30_TRN)
-  ENDIF   
+  ENDIF  
   CALL(CP_REFRESH)
 DONE
 
@@ -405,7 +610,9 @@ ONBUTTON(CP_SH_17_BTN)
     RED(CP_SH_17_SS)
   ELSE
     IFRED(CP_SH_17_SS)
-      AMBER(CP_SH_17_SS)
+      IFTHROWN(CP_TN_30_TRN)
+          AMBER(CP_SH_17_SS)
+      ENDIF
     ELSE  
 	    RED(CP_SH_17_SS)
     ENDIF  
@@ -418,7 +625,9 @@ ONBUTTON(CP_SH_16_BTN)
     RED(CP_SH_16_SS)
   ELSE
     IFRED(CP_SH_16_SS)
-      AMBER(CP_SH_16_SS)
+      IFCLOSED(CP_TN_30_TRN)
+        AMBER(CP_SH_16_SS)
+      ENDIF 
     ELSE  
 	    RED(CP_SH_16_SS)
     ENDIF  
@@ -444,7 +653,11 @@ ONBUTTON(CP_SH_14_BTN)
     RED(CP_SH_14_SS)
   ELSE
     IFRED(CP_SH_14_SS)
-      AMBER(CP_SH_14_SS)
+      IFCLOSED(CP_TN_24_TRN)
+        IFCLOSED(CP_TN_23_TRN)
+          AMBER(CP_SH_14_SS)
+        ENDIF  
+      ENDIF
     ELSE  
 	    RED(CP_SH_14_SS)
     ENDIF  
@@ -457,7 +670,11 @@ ONBUTTON(CP_SH_13_BTN)
     RED(CP_SH_13_SS)
   ELSE
     IFRED(CP_SH_13_SS)
-      AMBER(CP_SH_13_SS)
+      IFCLOSED(CP_TN_24_TRN)
+        IFTHROWN(CP_TN_23_TRN)
+          AMBER(CP_SH_13_SS)
+        ENDIF  
+      ENDIF
     ELSE  
 	    RED(CP_SH_13_SS)
     ENDIF  
@@ -665,14 +882,6 @@ SEQUENCE(CP_REFRESH)
       SET(CP_TN_22_THROWN_L,2)
       RESET(CP_TN_22_L,2)  // R&G
       RESET(CP_SH_G2_R,2)   // R&G
-      // reset signals
-      RED(CP_SH_G2_SB)
-      GREEN(CP_SH_G2_SE)   //OFF
-      RED(CP_SH_G4_SB)
-      GREEN(CP_SH_G4_SE)   //OFF
-      RED(CP_SH_L_SB) 
-      GREEN(CP_SH_L_SE)   //OFF
-      RED(CP_SH_15_SS)
   ENDIF
   
   IFTHROWN(CP_TN_24_TRN)
@@ -682,14 +891,6 @@ SEQUENCE(CP_REFRESH)
       RESET(CP_TN_22_THROWN_L,2)
       SET(CP_TN_22_L,2)  // R&G
       SET(CP_SH_G2_R,2)   // 
-      // reset signals
-      RED(CP_SH_G2_SB)
-      GREEN(CP_SH_G2_SE)   //OFF
-      RED(CP_SH_G4_SB)
-      GREEN(CP_SH_G4_SE)   //OFF
-      RED(CP_SH_L_SB) 
-      GREEN(CP_SH_L_SE)   //OFF
-      RED(CP_SH_15_SS)  
   ENDIF
 
   IFCLOSED(CP_TN_27_TRN)

@@ -577,7 +577,7 @@
     </turnout>
   </turnouts>
   <memories class="jmri.managers.configurexml.DefaultMemoryManagerXml">
-    <memory value="9:07 PM">
+    <memory value="3:01 PM">
       <systemName>IMCURRENTTIME</systemName>
     </memory>
     <memory value="1.0">
@@ -598,7 +598,7 @@
     </meter>
   </meters>
   <timebase class="jmri.jmrit.simpleclock.configurexml.SimpleTimebaseXml" time="Thu Jun 19 14:20:29 CEST 2025" rate="1.0" startrate="1.0" run="yes" master="yes" sync="no" correct="no" display="no" startstopped="no" startrunning="yes" startsettime="no" startclockoption="0" showbutton="no" startsetrate="yes" />
-  <LayoutEditor class="jmri.jmrit.display.layoutEditor.configurexml.LayoutEditorXml" name="My Layout" x="-2" y="45" windowheight="762" windowwidth="1619" panelheight="237" panelwidth="1230" sliders="no" scrollable="none" editable="yes" positionable="yes" controlling="yes" animating="yes" showhelpbar="no" drawgrid="yes" snaponadd="no" snaponmove="no" antialiasing="no" turnoutcircles="no" tooltipsnotedit="no" tooltipsinedit="yes" mainlinetrackwidth="4" xscale="1.0" yscale="1.0" sidetrackwidth="2" defaulttrackcolor="darkGray" defaultoccupiedtrackcolor="red" defaultalternativetrackcolor="white" defaulttextcolor="black" turnoutcirclecolor="black" turnoutcirclesize="4" turnoutdrawunselectedleg="yes" turnoutbx="20.0" turnoutcx="20.0" turnoutwid="10.0" xoverlong="30.0" xoverhwid="10.0" xovershort="10.0" autoblkgenerate="no" redBackground="192" greenBackground="192" blueBackground="192" gridSize="10" gridSize2nd="10" openDispatcher="no" useDirectTurnoutControl="no">
+  <LayoutEditor class="jmri.jmrit.display.layoutEditor.configurexml.LayoutEditorXml" name="My Layout" x="21" y="56" windowheight="762" windowwidth="1619" panelheight="237" panelwidth="1230" sliders="no" scrollable="none" editable="yes" positionable="yes" controlling="yes" animating="yes" showhelpbar="no" drawgrid="yes" snaponadd="no" snaponmove="no" antialiasing="no" turnoutcircles="no" tooltipsnotedit="no" tooltipsinedit="yes" mainlinetrackwidth="4" xscale="1.0" yscale="1.0" sidetrackwidth="2" defaulttrackcolor="darkGray" defaultoccupiedtrackcolor="red" defaultalternativetrackcolor="white" defaulttextcolor="black" turnoutcirclecolor="black" turnoutcirclesize="4" turnoutdrawunselectedleg="yes" turnoutbx="20.0" turnoutcx="20.0" turnoutwid="10.0" xoverlong="30.0" xoverhwid="10.0" xovershort="10.0" autoblkgenerate="no" redBackground="192" greenBackground="192" blueBackground="192" gridSize="10" gridSize2nd="10" openDispatcher="no" useDirectTurnoutControl="no">
     <layoutTrackDrawingOptions name="My Layout" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutTrackDrawingOptionsXml">
       <mainBallastColor>#000000</mainBallastColor>
       <mainBallastWidth>0</mainBallastWidth>
@@ -625,15 +625,15 @@
       <sideTieLength>0</sideTieLength>
       <sideTieWidth>0</sideTieWidth>
     </layoutTrackDrawingOptions>
-    <layoutturnout ident="TO1" type="DOUBLE_XOVER" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="1150.0" ycen="129.0" xa="1120.0" ya="119.0" xb="1180.0" yb="119.0" xc="1180.0" yc="139.0" xd="1120.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutDoubleXOverXml" turnoutname="T1" connectaname="T4" connectdname="T6" />
-    <layoutturnout ident="TO4" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="1069.0" ycen="140.0" xa="1089.0" ya="140.0" xb="1049.0" yb="140.0" xc="1049.0" yc="156.0" xd="1089.0" yd="140.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="T5" connectaname="T6" connectbname="T5" connectcname="T16" />
-    <layoutturnout ident="TO5" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="919.0" ycen="140.0" xa="939.0" ya="140.0" xb="899.0" yb="140.0" xc="891.0" yc="163.0" xd="939.0" yd="140.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="T8" connectaname="T5" connectbname="T7" connectcname="T11" />
-    <layoutturnout ident="TO6" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="970.0" ycen="119.0" xa="990.0" ya="119.0" xb="950.0" yb="119.0" xc="950.0" yc="109.0" xd="990.0" yd="119.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="T6" connectaname="T4" connectbname="T2" connectcname="T9" />
-    <layoutturnout ident="TO7" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="950.0" ycen="177.0" xa="970.0" ya="177.0" xb="930.0" yb="177.0" xc="930.0" yc="187.0" xd="970.0" yd="177.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="T7" connectaname="T20" connectbname="T14" connectcname="T15" />
-    <layoutturnout ident="TO8" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="562.0" ycen="177.0" xa="542.0" ya="177.0" xb="582.0" yb="177.0" xc="582.0" yc="187.0" xd="542.0" yd="177.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="T21" connectaname="T13" connectbname="T14" connectcname="T15" />
-    <layoutturnout ident="TO13" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="341.0" ycen="120.0" xa="321.0" ya="120.0" xb="361.0" yb="120.0" xc="361.0" yc="109.0" xd="321.0" yd="120.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="T25" connectaname="T8" connectbname="T2" connectcname="T9" />
-    <layoutturnout ident="TO14" type="DOUBLE_XOVER" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="231.0" ycen="129.0" xa="201.0" ya="119.0" xb="261.0" yb="119.0" xc="261.0" yc="139.0" xd="201.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutDoubleXOverXml" turnoutname="T26" connectbname="T8" connectcname="T10" />
-    <layoutturnout ident="TO3" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="340.0" ycen="139.0" xa="320.0" ya="139.0" xb="360.0" yb="139.0" xc="360.0" yc="149.0" xd="320.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="T24" connectaname="T10" connectbname="T7" connectcname="T12" />
+    <layoutturnout ident="TO1" type="DOUBLE_XOVER" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="1150.0" ycen="129.0" xa="1120.0" ya="119.0" xb="1180.0" yb="119.0" xc="1180.0" yc="139.0" xd="1120.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutDoubleXOverXml" turnoutname="VTN_2" connectaname="T4" connectdname="T6" />
+    <layoutturnout ident="TO4" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="1069.0" ycen="140.0" xa="1089.0" ya="140.0" xb="1049.0" yb="140.0" xc="1049.0" yc="156.0" xd="1089.0" yd="140.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="VTN_5" connectaname="T6" connectbname="T5" connectcname="T16" />
+    <layoutturnout ident="TO5" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="919.0" ycen="140.0" xa="939.0" ya="140.0" xb="899.0" yb="140.0" xc="891.0" yc="163.0" xd="939.0" yd="140.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="VTN_8" connectaname="T5" connectbname="T7" connectcname="T11" />
+    <layoutturnout ident="TO6" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="970.0" ycen="119.0" xa="990.0" ya="119.0" xb="950.0" yb="119.0" xc="950.0" yc="109.0" xd="990.0" yd="119.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="VTN_6" connectaname="T4" connectbname="T2" connectcname="T9" />
+    <layoutturnout ident="TO7" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="950.0" ycen="177.0" xa="970.0" ya="177.0" xb="930.0" yb="177.0" xc="930.0" yc="187.0" xd="970.0" yd="177.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="VTN_7" connectaname="T20" connectbname="T14" connectcname="T15" />
+    <layoutturnout ident="TO8" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="562.0" ycen="177.0" xa="542.0" ya="177.0" xb="582.0" yb="177.0" xc="582.0" yc="187.0" xd="542.0" yd="177.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="VTN_21" connectaname="T13" connectbname="T14" connectcname="T15" />
+    <layoutturnout ident="TO13" type="LH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="341.0" ycen="120.0" xa="321.0" ya="120.0" xb="361.0" yb="120.0" xc="361.0" yc="109.0" xd="321.0" yd="120.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutLHTurnoutXml" turnoutname="VTN_25" connectaname="T8" connectbname="T2" connectcname="T9" />
+    <layoutturnout ident="TO14" type="DOUBLE_XOVER" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="231.0" ycen="129.0" xa="201.0" ya="119.0" xb="261.0" yb="119.0" xc="261.0" yc="139.0" xd="201.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutDoubleXOverXml" turnoutname="VTN_27" connectbname="T8" connectcname="T10" />
+    <layoutturnout ident="TO3" type="RH_TURNOUT" hidden="no" disabled="no" disableWhenOccupied="no" showtooltip="yes" continuing="2" xcen="340.0" ycen="139.0" xa="320.0" ya="139.0" xb="360.0" yb="139.0" xc="360.0" yc="149.0" xd="320.0" yd="139.0" ver="1" class="jmri.jmrit.display.layoutEditor.configurexml.LayoutRHTurnoutXml" turnoutname="VTN_24" connectaname="T10" connectbname="T7" connectcname="T12" />
     <tracksegment ident="T2" connect1name="TO13" type1="TURNOUT_B" connect2name="TO6" type2="TURNOUT_B" dashed="no" mainline="yes" hidden="no" class="jmri.jmrit.display.layoutEditor.configurexml.TrackSegmentXml" />
     <tracksegment ident="T4" connect1name="TO6" type1="TURNOUT_A" connect2name="TO1" type2="TURNOUT_A" dashed="no" mainline="yes" hidden="no" class="jmri.jmrit.display.layoutEditor.configurexml.TrackSegmentXml" />
     <tracksegment ident="T5" connect1name="TO5" type1="TURNOUT_A" connect2name="TO4" type2="TURNOUT_B" dashed="no" mainline="yes" hidden="no" class="jmri.jmrit.display.layoutEditor.configurexml.TrackSegmentXml" />
@@ -680,104 +680,104 @@
   <filehistory>
     <operation>
       <type>app</type>
-      <date>Sun Apr 12 19:47:57 CEST 2026</date>
+      <date>Sat Apr 04 14:48:47 CEST 2026</date>
       <filename>PanelPro (v5.14.0)</filename>
     </operation>
     <operation>
       <type>Load OK</type>
-      <date>Sun Apr 12 19:48:58 CEST 2026</date>
+      <date>Sat Apr 04 14:49:43 CEST 2026</date>
       <filename>/C:/Users/arkad/JMRI/Przymorze.jmri/Przymorze.xml</filename>
       <filehistory>
         <operation>
           <type>app</type>
-          <date>Sat Apr 04 14:48:47 CEST 2026</date>
+          <date>Sat Apr 04 12:30:51 CEST 2026</date>
           <filename>PanelPro (v5.14.0)</filename>
         </operation>
         <operation>
           <type>Load OK</type>
-          <date>Sat Apr 04 14:49:43 CEST 2026</date>
+          <date>Sat Apr 04 12:31:24 CEST 2026</date>
           <filename>/C:/Users/arkad/JMRI/Przymorze.jmri/Przymorze.xml</filename>
           <filehistory>
             <operation>
               <type>app</type>
-              <date>Sat Apr 04 12:30:51 CEST 2026</date>
-              <filename>PanelPro (v5.14.0)</filename>
+              <date>Sun Jun 22 12:13:40 CEST 2025</date>
+              <filename>PanelPro (v5.10.0)</filename>
             </operation>
             <operation>
               <type>Load OK</type>
-              <date>Sat Apr 04 12:31:24 CEST 2026</date>
-              <filename>/C:/Users/arkad/JMRI/Przymorze.jmri/Przymorze.xml</filename>
+              <date>Sun Jun 22 12:14:06 CEST 2025</date>
+              <filename>/C:/Users/arkadiusz.hahn/JMRI/Przymorze.jmri/Przymorze.xml</filename>
               <filehistory>
                 <operation>
                   <type>app</type>
-                  <date>Sun Jun 22 12:13:40 CEST 2025</date>
+                  <date>Sun Jun 22 11:58:11 CEST 2025</date>
                   <filename>PanelPro (v5.10.0)</filename>
                 </operation>
                 <operation>
                   <type>Load OK</type>
-                  <date>Sun Jun 22 12:14:06 CEST 2025</date>
+                  <date>Sun Jun 22 11:58:31 CEST 2025</date>
                   <filename>/C:/Users/arkadiusz.hahn/JMRI/Przymorze.jmri/Przymorze.xml</filename>
                   <filehistory>
                     <operation>
                       <type>app</type>
-                      <date>Sun Jun 22 11:58:11 CEST 2025</date>
+                      <date>Sun Jun 22 11:05:29 CEST 2025</date>
                       <filename>PanelPro (v5.10.0)</filename>
                     </operation>
                     <operation>
                       <type>Load OK</type>
-                      <date>Sun Jun 22 11:58:31 CEST 2025</date>
+                      <date>Sun Jun 22 11:05:47 CEST 2025</date>
                       <filename>/C:/Users/arkadiusz.hahn/JMRI/Przymorze.jmri/Przymorze.xml</filename>
                       <filehistory>
                         <operation>
                           <type>app</type>
-                          <date>Sun Jun 22 11:05:29 CEST 2025</date>
+                          <date>Sun Jun 22 10:25:44 CEST 2025</date>
                           <filename>PanelPro (v5.10.0)</filename>
                         </operation>
                         <operation>
                           <type>Load OK</type>
-                          <date>Sun Jun 22 11:05:47 CEST 2025</date>
+                          <date>Sun Jun 22 10:26:05 CEST 2025</date>
                           <filename>/C:/Users/arkadiusz.hahn/JMRI/Przymorze.jmri/Przymorze.xml</filename>
                         </operation>
                         <operation>
                           <type>Store</type>
-                          <date>Sun Jun 22 11:57:58 CEST 2025</date>
+                          <date>Sun Jun 22 11:02:36 CEST 2025</date>
                           <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze.xml</filename>
                         </operation>
                       </filehistory>
                     </operation>
                     <operation>
                       <type>Store</type>
-                      <date>Sun Jun 22 12:00:56 CEST 2025</date>
-                      <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze_20250622.xml</filename>
+                      <date>Sun Jun 22 11:57:58 CEST 2025</date>
+                      <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze.xml</filename>
                     </operation>
                   </filehistory>
                 </operation>
                 <operation>
                   <type>Store</type>
-                  <date>Sun Jun 22 12:22:46 CEST 2025</date>
-                  <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze.xml</filename>
+                  <date>Sun Jun 22 12:00:56 CEST 2025</date>
+                  <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze_20250622.xml</filename>
                 </operation>
               </filehistory>
             </operation>
             <operation>
               <type>Store</type>
-              <date>Sat Apr 04 12:35:03 CEST 2026</date>
-              <filename>C:\Users\arkad\JMRI\Przymorze.jmri\Przymorze.xml</filename>
+              <date>Sun Jun 22 12:22:46 CEST 2025</date>
+              <filename>C:\Users\arkadiusz.hahn\JMRI\Przymorze.jmri\Przymorze.xml</filename>
             </operation>
           </filehistory>
         </operation>
         <operation>
           <type>Store</type>
-          <date>Sat Apr 04 15:01:27 CEST 2026</date>
+          <date>Sat Apr 04 12:35:03 CEST 2026</date>
           <filename>C:\Users\arkad\JMRI\Przymorze.jmri\Przymorze.xml</filename>
         </operation>
       </filehistory>
     </operation>
     <operation>
       <type>Store</type>
-      <date>Sun Apr 12 21:07:59 CEST 2026</date>
+      <date>Sat Apr 04 15:01:27 CEST 2026</date>
       <filename>C:\Users\arkad\JMRI\Przymorze.jmri\Przymorze.xml</filename>
     </operation>
   </filehistory>
-  <!--Written by JMRI version 5.14+Rdea51dcccf on Sun Apr 12 21:07:59 CEST 2026-->
+  <!--Written by JMRI version 5.14+Rdea51dcccf on Sat Apr 04 15:01:27 CEST 2026-->
 </layout-config>

@@ -3,6 +3,10 @@
 
 //****  HAL Devices   ****//
 // Control panel
+// Virtual Pins
+//HAL(Bitmap,CP_ROUTE_FLAGS,16)
+//HAL(Bitmap,800,16)
+// ICBlocks
 HAL(PCF8575,CP_SH_B, 16, {I2CMux_1,SubBus_5,0x20})  	// 16 bit io Signal
 HAL(PCF8575,CP_SH_A, 16, {I2CMux_1,SubBus_4,0x20})  	// 16 bit io Signal
 HAL(PCF8574,CP_SH_2, 8, {I2CMux_1,SubBus_5,0x38})  	    // 8 bit io  Multi

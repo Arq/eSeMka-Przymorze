@@ -27,10 +27,10 @@
     </settings>
     <tableDetails xmlns="http://jmri.org/xml/schema/auxiliary-configuration/table-details-4-3-5.xsd"/>
     <windowDetails xmlns="http://jmri.org/xml/schema/auxiliary-configuration/window-details-4-3-5.xsd">
-        <window xmlns="" class="Edit Turnout" locX="50.0" locY="30.0"/>
+        <window xmlns="" class="jmri.jmrit.roster.Roster"/>
         <window xmlns="" class="PanelPro" height="264.0" locX="567.0" locY="318.0" width="466.0"/>
         <window xmlns="" class="jmri.jmrit.display.layoutEditor.LayoutEditor:My Layout" height="762.0" locX="-38.0" locY="56.0" width="1619.0"/>
-        <window xmlns="" class="jmri.jmrit.roster.Roster"/>
         <window xmlns="" class="Edit Track Segment" locX="50.0" locY="30.0"/>
+        <window xmlns="" class="Edit Turnout" locX="50.0" locY="30.0"/>
     </windowDetails>
 </auxiliary-configuration>

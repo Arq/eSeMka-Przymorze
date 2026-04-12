@@ -92,10 +92,7 @@ ALIAS(PROC_BTN1)
 ALIAS(PROC_BTN2)
 //ALIAS(PROC_BTN3)
 ALIAS(PROC_RESET)
-ALIAS(PROC_RESET_CP)
 //ALIAS(PROC_SIG2_RED)
-
-ALIAS(CP_REFRESH)   // Dasboard routes an occupancy refersh
 
 //*******************/
 //*** ROUTES Ids  **//

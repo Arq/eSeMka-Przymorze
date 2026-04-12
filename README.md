@@ -6,6 +6,7 @@ Author: Arkadiusz Hahn
 
 ## Release Notes
 2026-04-11  Initial repository with Commandstation-Ex and JMRI configuration
+2026-04-12  Dashboard sends DCC commands to control the turnouts
 
 ## Project Description
 * The idea of the project

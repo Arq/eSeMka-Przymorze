@@ -1,4 +1,5 @@
 # eSeMka-Przymorze
+[Wersja polska](README-PL.md)
 The project of the "Przymorze" railway station of the H0 modelers club eSeMka
 
 Date of creation:  2026-04-11
